@@ -12,7 +12,9 @@ const Navbar = () => {
 
   return (
     <nav className="bg-gray-900/90 backdrop-blur border-b border-gray-700 p-4 flex items-center justify-between shadow-md">
-      <div className="text-xl font-bold text-blue-400">RH Manager</div>
+      <div className="text-xl font-bold text-blue-400">
+        RECURSOS HUMANOS PRUEBA
+      </div>
       <div className="flex space-x-4">
         <Link to="/" className={linkClasses("/")}>
           Colaboradores

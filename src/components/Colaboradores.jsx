@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import api from "../api/api";
 import rrhImage from "../assets/rrh.png";
 
+// ESTADOS PARA EL FORMULARIO Y SU UTILIZACION.
 const Colaboradores = () => {
   const [filtro, setFiltro] = useState("");
   const [colaboradores, setColaboradores] = useState([]);
   const [empresas, setEmpresas] = useState([]);
+  const [editandoId, setEditandoId] = useState(null);
   const [form, setForm] = useState({
     nombre: "",
     edad: "",
@@ -30,9 +32,21 @@ const Colaboradores = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await api.post("/colaboradores", form);
-    setForm({ nombre: "", edad: "", telefono: "", email: "", empresa: "" });
+    if (!validarFormulario()) return;
+
+    if (editandoId) {
+      await api.put(`/colaboradores/${editandoId}`, form);
+    } else {
+      await api.post("/colaboradores", form);
+    }
+
+    limpiarFormulario();
     getColaboradores();
+  };
+
+  const limpiarFormulario = () => {
+    setForm({ nombre: "", edad: "", telefono: "", email: "", empresa: "" });
+    setEditandoId(null);
   };
 
   useEffect(() => {
@@ -52,6 +66,38 @@ const Colaboradores = () => {
       colab.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
       colab.empresa.toLowerCase().includes(filtro.toLowerCase())
   );
+
+  //Funciones para editar y eliminar colaboradores
+  const cargarParaEditar = (colab) => {
+    setForm({
+      nombre: colab.nombre,
+      edad: colab.edad,
+      telefono: colab.telefono,
+      email: colab.email,
+      empresa: colab.empresa,
+    });
+    setEditandoId(colab.id);
+  };
+
+  const eliminarColaborador = async (id) => {
+    const confirmar = window.confirm(
+      "¿Estás seguro de que deseas eliminar este colaborador?"
+    );
+    if (confirmar) {
+      await api.delete(`/colaboradores/${id}`);
+      getColaboradores();
+    }
+  };
+
+  // Funcion para validar
+  const validarFormulario = () => {
+    const { nombre, edad, telefono, email, empresa } = form;
+    if (!nombre || !edad || !telefono || !email || !empresa) {
+      alert("Por favor completa todos los campos antes de guardar.");
+      return false;
+    }
+    return true;
+  };
 
   return (
     <div className="p-6 max-w-6xl mx-auto text-white">
@@ -151,6 +197,7 @@ const Colaboradores = () => {
               <th className="p-3">Teléfono</th>
               <th className="p-3">Email</th>
               <th className="p-3">Empresa</th>
+              <th className="p-3 text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -164,6 +211,22 @@ const Colaboradores = () => {
                 <td className="p-3">{colab.telefono}</td>
                 <td className="p-3">{colab.email}</td>
                 <td className="p-3">{colab.empresa}</td>
+                <td className="p-3 flex gap-2 justify-center">
+                  <button
+                    onClick={() => cargarParaEditar(colab)}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded"
+                    title="Editar"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => eliminarColaborador(colab.id)}
+                    className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
+                    title="Eliminar"
+                  >
+                    🗑️
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

@@ -77,19 +77,15 @@ const Empresas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await api.post("/empresas", form);
-    setForm({
-      nombreComercial: "",
-      razonSocial: "",
-      NIT: "",
-      telefono: "",
-      correo: "",
-      paisId: "",
-      departamentoId: "",
-      municipioId: "",
-    });
-    setDepartamentos([]);
-    setMunicipios([]);
+    if (!validarFormulario()) return;
+
+    if (editandoId) {
+      await api.put(`/empresas/${editandoId}`, form);
+    } else {
+      await api.post("/empresas", form);
+    }
+
+    limpiarFormulario();
     getEmpresas();
   };
 
@@ -108,6 +104,74 @@ const Empresas = () => {
   const cerrarModal = () => {
     setModalVisible(false);
     setEmpresaSeleccionada(null);
+  };
+
+  const [editandoId, setEditandoId] = useState(null);
+
+  const limpiarFormulario = () => {
+    setForm({
+      nombreComercial: "",
+      razonSocial: "",
+      NIT: "",
+      telefono: "",
+      correo: "",
+      paisId: "",
+      departamentoId: "",
+      municipioId: "",
+    });
+    setEditandoId(null);
+  };
+
+  const cargarParaEditar = (empresa) => {
+    setForm({
+      nombreComercial: empresa.nombreComercial,
+      razonSocial: empresa.razonSocial,
+      NIT: empresa.NIT,
+      telefono: empresa.telefono,
+      correo: empresa.correo,
+      paisId: empresa.paisId,
+      departamentoId: empresa.departamentoId,
+      municipioId: empresa.municipioId,
+    });
+    setEditandoId(empresa.id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const eliminarEmpresa = async (id) => {
+    const confirmar = window.confirm(
+      "¿Estás seguro de que deseas eliminar esta empresa?"
+    );
+    if (confirmar) {
+      await api.delete(`/empresas/${id}`);
+      getEmpresas();
+    }
+  };
+
+  const validarFormulario = () => {
+    const {
+      nombreComercial,
+      razonSocial,
+      NIT,
+      telefono,
+      correo,
+      paisId,
+      departamentoId,
+      municipioId,
+    } = form;
+    if (
+      !nombreComercial ||
+      !razonSocial ||
+      !NIT ||
+      !telefono ||
+      !correo ||
+      !paisId ||
+      !departamentoId ||
+      !municipioId
+    ) {
+      alert("Por favor completa todos los campos.");
+      return false;
+    }
+    return true;
   };
 
   return (
@@ -218,6 +282,7 @@ const Empresas = () => {
               <th className="p-3">Nombre Comercial</th>
               <th className="p-3">Razón Social</th>
               <th className="p-3">Detalles</th>
+              <th className="p-3">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -235,6 +300,22 @@ const Empresas = () => {
                     title="Ver detalles"
                   >
                     🔍
+                  </button>
+                </td>
+                <td className="p-3 flex gap-2">
+                  <button
+                    onClick={() => cargarParaEditar(emp)}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded"
+                    title="Editar"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => eliminarEmpresa(emp.id)}
+                    className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
+                    title="Eliminar"
+                  >
+                    🗑️
                   </button>
                 </td>
               </tr>
