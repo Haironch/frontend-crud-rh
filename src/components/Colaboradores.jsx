@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
+import rrhImage from "../assets/rrh.png";
 
 const Colaboradores = () => {
   const [filtro, setFiltro] = useState("");
@@ -54,6 +55,20 @@ const Colaboradores = () => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto text-white">
+      <div className="flex justify-center mb-6">
+        <img
+          src={rrhImage}
+          alt="RRH Logo"
+          className="rounded-lg"
+          style={{
+            width: "100%",
+            maxWidth: "600px",
+            aspectRatio: "2.35 / 1",
+            objectFit: "cover",
+          }}
+        />
+      </div>
+
       <h2 className="text-3xl font-bold mb-6 text-center text-blue-400">
         Registro de Colaboradores
       </h2>
